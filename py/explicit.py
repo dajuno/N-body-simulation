@@ -7,12 +7,14 @@ def forces(x, m, G):
     N = x.shape[0]
     dim = x.shape[1]
     F = np.zeros((N, N, dim))
+    eps = 1.e-3
     for i in range(len(F)):
         for j in range(len(F)):
             r = x[j, :] - x[i, :]
-            F[i, j, :] = m[i]*m[j]*r/np.linalg.norm(r)**3
+            F[i, j, :] = m[i]*m[j]*r/(np.linalg.norm(r)**3 + eps)
     F *= G
     return F
+
 
 def sumgravity(F):
     ''' force pair interaction matrix F is nan on diagonal -- sum all other
@@ -59,7 +61,7 @@ v = np.array([[0., 1],
 m = 20*np.ones(N)
 
 # disk, polar coordinates
-N = 120
+N = 100
 #  r = np.ones(N)
 r = np.random.rand(N)*10
 #  alpha = np.linspace(0, 2*np.pi, N)
@@ -67,7 +69,7 @@ alpha = np.random.rand(N)*2*np.pi
 omega = 1.
 x = 0.5*(r*np.array([np.cos(alpha), np.sin(alpha)])).T
 v = (omega*r*np.array([-np.sin(alpha), np.cos(alpha)])).T
-m = 5*np.ones(N)
+m = 10*np.ones(N)
 
 
 x_ode = x.copy()
