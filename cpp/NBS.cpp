@@ -75,11 +75,11 @@ std::vector<Body> BuildBodies(std::vector<Body>::size_type N) {
 	//~ circle of radius r and have apropriate starting velocities.
 	//~ A large mass is put into the origin, to simulate dark matter :-)
 	
-	std::vector<Body> B (N);
+	std::vector<Body> B (N+1);
 	
 	// Center with large mass
 	Body center {0,0,0,0,0,0,1e6*solar_mass};
-	B.push_back(center);
+	B[0] = center;
 	
 	// Random number generators
     std::random_device rd;
@@ -89,28 +89,22 @@ std::vector<Body> BuildBodies(std::vector<Body>::size_type N) {
     std::uniform_real_distribution<> dis_angle(0, 2*M_PI);
 
 	// Sample body positions and calculate inial velocities (physics?)
-	for (std::vector<Body>::size_type i=0; i<N; ++i) {
+	for (std::vector<Body>::size_type i=1; i<N+1; ++i) {
 		double r = dis_radius(gen);
 		double angle = dis_angle(gen);
 		double num = gravitational_constant*1e6*solar_mass;
 		
-		Body b;
-		b.x = r * cos(angle);
-		b.y = r * sin(angle);
+		B[i].x = r * cos(angle);
+		B[i].y = r * sin(angle);
 		
-		b.xv = -sqrt(num/r) * sin(angle);
-		b.yv = sqrt(num/r) * cos(angle);
+		B[i].xv = -sqrt(num/r) * sin(angle);
+		B[i].yv = sqrt(num/r) * cos(angle);
 		
-		b.xa = 0;
-		b.ya = 0;
+		B[i].xa = 0;
+		B[i].ya = 0;
 		
-		b.m = 10*solar_mass;
-	
-		B.push_back(b);
+		B[i].m = 10*solar_mass;
 	}
-	
-
-	
 	return B;
 }
 
