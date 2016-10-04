@@ -7,48 +7,44 @@
 
 namespace N_body_simulation {
 
-void NBS::solve_acc(id n) {
+inline void NBS::solve_acc(id n) {
 	//~ Calculates and overwrites acceleration using data 
 	//~ from current positions
-	B[n].x_acc=0;
-	B[n].y_acc=0;
+	B[n].xa=0;
+	B[n].ya=0;
 	
 	for (id i=0; i<B.size(); ++i) {
-		double dx = B[i].x_pos-B[n].x_pos;
-		double dy = B[i].y_pos-B[n].y_pos;
-		double d = sqrt(dx*dx + dy*dy)+softening_constant;
-		double m = B[i].mass;
+		double dx = B[i].x-B[n].x;
+		double dy = B[i].y-B[n].y;
+		double d = sqrt(dx*dx + dy*dy + softening_constant);
+		double m = B[i].m;
 		
-		B[n].x_acc += dx*m / (d*d*d);
-		B[n].y_acc += dy*m / (d*d*d);
+		B[n].xa += dx*m / (d*d*d);
+		B[n].ya += dy*m / (d*d*d);
 	}
 	
-	B[n].x_acc *= gravitational_constant;
-	B[n].y_acc *= gravitational_constant;
-}
-
-void NBS::solve_vel(id n) {
-	//~ Calculates and overwrites velocities using data from current 
-	//~ accelerations
-	B[n].x_vel += time_step_size*B[n].x_acc;
-	B[n].y_vel += time_step_size*B[n].y_acc;
-}
-
-void NBS::solve_pos(id n) {
-	//~ Calculates and overwrites positions using data from current  
-	//~ accelerations and velocities
-	B[n].x_pos += B[n].x_acc *time_step_size*time_step_size/2 
-				+ B[n].x_vel *time_step_size;
-	B[n].y_pos += B[n].y_acc *time_step_size*time_step_size/2 
-				+ B[n].y_vel *time_step_size;
+	B[n].xa *= gravitational_constant;
+	B[n].ya *= gravitational_constant;
 }
 
 void NBS::solve_next() {
-	// Solves the next iterations by putting the three operations 
-	//~ together (in the right order!)
+	// Estimates the positions and velocities after dt
+	
+	#pragma omp parallel for
 	for (id i=0; i<B.size(); ++i) solve_acc(i);
-	for (id i=0; i<B.size(); ++i) solve_vel(i);
-	for (id i=0; i<B.size(); ++i) solve_pos(i);
+
+	//~ Calculate and overwrite velocities and positions using data  
+	//~ from current accelerations.
+	#pragma omp parallel for
+	for (id n=0; n<B.size(); ++n) {
+		B[n].xv += dt*B[n].xa;
+		B[n].yv += dt*B[n].ya;		
+		
+		//~ B[n].x += B[n].xa *dt*dt/2 + B[n].xv *dt;
+		//~ B[n].y += B[n].ya *dt*dt/2 + B[n].yv *dt;
+		B[n].x += B[n].xv *dt;
+		B[n].y += B[n].yv *dt;
+	}
 }
 
 void NBS::solve(unsigned int num_steps) {
@@ -63,8 +59,8 @@ void NBS::solve(unsigned int num_steps) {
 	// Write current positions to files
 	for (unsigned int s=0; s<num_steps; ++s) {
 		for (Body b : B) {
-			x_fst<<b.x_pos<<" ";
-			y_fst<<b.y_pos<<" ";
+			x_fst<<b.x<<" ";
+			y_fst<<b.y<<" ";
 		}
 		x_fst<<std::endl;
 		y_fst<<std::endl;
@@ -74,7 +70,7 @@ void NBS::solve(unsigned int num_steps) {
 	}
 }
 
-std::vector<Body> BuildBodies(std::vector<Body>::size_type N, double r) {
+std::vector<Body> BuildBodies(std::vector<Body>::size_type N) {
 	//~ Builds a vector of starting Bodies which are sampled within in
 	//~ circle of radius r and have apropriate starting velocities.
 	//~ A large mass is put into the origin, to simulate dark matter :-)
@@ -88,26 +84,27 @@ std::vector<Body> BuildBodies(std::vector<Body>::size_type N, double r) {
 	// Random number generators
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis_radius(0, r);
+	double radius = 1e18;
+    std::uniform_real_distribution<> dis_radius(0, radius);
     std::uniform_real_distribution<> dis_angle(0, 2*M_PI);
 
 	// Sample body positions and calculate inial velocities (physics?)
 	for (std::vector<Body>::size_type i=0; i<N; ++i) {
-		double radius = dis_radius(gen);
+		double r = dis_radius(gen);
 		double angle = dis_angle(gen);
 		double num = gravitational_constant*1e6*solar_mass;
 		
 		Body b;
-		b.x_pos = radius * cos(angle);
-		b.y_pos = radius * sin(angle);
+		b.x = r * cos(angle);
+		b.y = r * sin(angle);
 		
-		b.x_vel = -sqrt(num/radius) * sin(angle);
-		b.y_vel = sqrt(num/radius) * cos(angle);
+		b.xv = -sqrt(num/r) * sin(angle);
+		b.yv = sqrt(num/r) * cos(angle);
 		
-		b.x_acc = 0;
-		b.y_acc = 0;
+		b.xa = 0;
+		b.ya = 0;
 		
-		b.mass = 10*solar_mass;
+		b.m = 10*solar_mass;
 	
 		B.push_back(b);
 	}

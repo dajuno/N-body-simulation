@@ -5,13 +5,12 @@ int main() {
 	try
 	{
 		
-	int N = 100;
-	double radius = 1e18;
-	double time_step_size = 1e4;
+	int N = 1e2;
+	double num_steps = 1e3;
 	
-	std::vector<Body> B = BuildBodies(N,radius);
+	std::vector<Body> B = BuildBodies(N);
 	NBS nbs {B};
-	nbs.solve(time_step_size);
+	nbs.solve(num_steps);
 		
 	return 0;
 	}

@@ -1,5 +1,6 @@
 import numpy as np
 # For movies:
+#import matplotlib
 #matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -7,8 +8,8 @@ import matplotlib.animation as animation
 def main():
 
    # For movies:
-   # Writer = animation.writers['ffmpeg']
-   # writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+    #Writer = animation.writers['ffmpeg']
+    #writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
 
     x = np.loadtxt("x")
     y = np.loadtxt("y")
@@ -28,7 +29,7 @@ def main():
     ani = animation.FuncAnimation(fig, update_plot, frames=range(numframes), interval=1, fargs=(x,y, scat))
       
     # For movies:                            
-	#ani.save('animation.mp4', writer=writer)
+    #ani.save('animation.mp4', writer=writer)
     plt.show()
 
 def update_plot(i, a, b, scat):
