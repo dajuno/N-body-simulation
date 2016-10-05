@@ -41,7 +41,7 @@ private:
 	void solve_next();
 	void solve_acc(id);
 	void euler_improved();
-	void forces(std::vector<Force>& F);
+	void forces(std::vector<Force>* F);
 
 	std::vector<Body> B;
 	double dt = 1e11; // Time step size
