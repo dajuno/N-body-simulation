@@ -31,12 +31,12 @@ void NBS::solve_next() {
 	// Estimates the positions and velocities after dt
     // standard first order Euler method
 	
-	#pragma omp parallel for
+#pragma omp parallel for
 	for (id i=0; i<B.size(); ++i) solve_acc(i);
 
 	//~ Calculate and overwrite velocities and positions using data  
 	//~ from current accelerations.
-	#pragma omp parallel for
+#pragma omp parallel for
 	for (id n=0; n<B.size(); ++n) {
 		B[n].xv += dt*B[n].xa;
 		B[n].yv += dt*B[n].ya;		
@@ -78,11 +78,10 @@ void NBS::euler_improved() {
     // cf. Aarseth (2003): Gravitational N-Body-Simulations 
     //
     // better not to do these declarations at every time step!?
-    int N = B.size();
-    std::vector<Force> F1(N);
-    std::vector<Force> F2(N);
-    std::vector<double> x0(N);
-    std::vector<double> y0(N);
+    std::vector<Force> F1(B.size());
+    std::vector<Force> F2(B.size());
+    std::vector<double> x0(B.size());
+    std::vector<double> y0(B.size());
     // std::vector<double> vx0(N);
     // std::vector<double> vy0(N);
 
@@ -113,8 +112,8 @@ void NBS::euler_improved() {
         Fmean_x = 0.5*(F1[n].x + F2[n].x);
         Fmean_y = 0.5*(F1[n].y + F2[n].y);
 		
-        B[n].x = Fmean_x * kt + B[n].xv *dt + x0[n];
-        B[n].y = Fmean_y * kt + B[n].yv *dt + y0[n];
+        B[n].x = Fmean_x*kt + B[n].xv *dt + x0[n];
+        B[n].y = Fmean_y*kt + B[n].yv *dt + y0[n];
 
 		B[n].xv += dt*Fmean_x;
 		B[n].yv += dt*Fmean_y;
