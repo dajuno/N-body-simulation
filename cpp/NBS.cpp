@@ -14,8 +14,8 @@ inline void NBS::solve_acc(id n) {
 	B[n].ya=0;
 	
 	for (id i=0; i<B.size(); ++i) {
-		double dx = B[i].x-B[n].x;
-		double dy = B[i].y-B[n].y;
+		double dx = B[i].x - B[n].x;
+		double dy = B[i].y - B[n].y;
 		double d = sqrt(dx*dx + dy*dy + softening_constant);
 		double m = B[i].m;
 		
@@ -48,27 +48,27 @@ void NBS::solve_next() {
 	}
 }
 
-void NBS::forces(std::vector<Force>& F) {
+void NBS::forces(std::vector<Force>* F) {
 	// Calculates forces without overwriting
 
     double dx, dy, d, m;
 
-    for (id n=0; n<B.size(); ++n) {
-        F[n].x = 0;
-        F[n].y = 0;
 #pragma omp parallel for
+    for (id n=0; n<B.size(); ++n) {
+        (*F)[n].x = 0;
+        (*F)[n].y = 0;
         for (id i=0; i<B.size(); ++i) {
             dx = B[i].x - B[n].x;
             dy = B[i].y - B[n].y;
             d = sqrt(dx*dx + dy*dy + softening_constant);
             m = B[i].m;
             
-            F[n].x += dx*m / (d*d*d);
-            F[n].y += dy*m / (d*d*d);
+            (*F)[n].x += dx*m / (d*d*d);
+            (*F)[n].y += dy*m / (d*d*d);
         }
         
-        *F[n].x *= gravitational_constant;
-        *F[n].y *= gravitational_constant;
+        (*F)[n].x *= gravitational_constant;
+        (*F)[n].y *= gravitational_constant;
     }
 
 }
@@ -76,16 +76,49 @@ void NBS::forces(std::vector<Force>& F) {
 void NBS::euler_improved() {
     // compute one time step with the Euler corrected integration scheme
     // cf. Aarseth (2003): Gravitational N-Body-Simulations 
-    
+    //
     // better not to do these declarations at every time step!?
-    std::vector<Force> F;
+    int N = B.size();
+    std::vector<Force> F1(N);
+    std::vector<Force> F2(N);
+    std::vector<double> x0(N);
+    std::vector<double> y0(N);
+    // std::vector<double> vx0(N);
+    // std::vector<double> vy0(N);
 
-    // 0. gather accelerations at current time
-#pragma omp parallel for
-    forces(&F);
+    double kt = 0.5*dt*dt;
+    double Fmean_x, Fmean_y;
 
-    // 1. first 
-    for (id n=0; n<B.size(); ++n) {
+    // 1. first order step
+    forces(&F1);
+
+	for (id n=0; n<B.size(); ++n) {
+        // save positions and velocities at beginning of time interval
+        x0[n] = B[n].x;
+        y0[n] = B[n].y;
+        // vx0[n] = B[n].xv;
+        // vy0[n] = B[n].yv;
+
+		// B[n].xv += dt*F1[n].x;
+		// B[n].yv += dt*F1[n].y;
+		
+        B[n].x += F1[n].x * kt + B[n].xv*dt;
+        B[n].y += F1[n].y * kt + B[n].yv*dt;
+	}
+
+    // 2. correction with mean of forces F2=F(t1), F1=F(t0)
+    forces(&F2);
+
+	for (id n=0; n < B.size(); ++n) {
+        Fmean_x = 0.5*(F1[n].x + F2[n].x);
+        Fmean_y = 0.5*(F1[n].y + F2[n].y);
+		
+        B[n].x = Fmean_x * kt + B[n].xv *dt + x0[n];
+        B[n].y = Fmean_y * kt + B[n].yv *dt + y0[n];
+
+		B[n].xv += dt*Fmean_x;
+		B[n].yv += dt*Fmean_y;
+	}
 
 
 }
@@ -109,7 +142,9 @@ void NBS::solve(unsigned int num_steps) {
 		y_fst<<std::endl;
 	
 	// Solve the next iteration
-	solve_next();
+    // solve_next();
+    euler_improved();
+    std::cout << s << std::endl;
 	}
 }
 
