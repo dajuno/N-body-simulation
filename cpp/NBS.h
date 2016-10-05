@@ -3,52 +3,57 @@
 #include <vector>
 #include <math.h>
 #include <random>
+#include <memory>
 
 namespace N_body_simulation {
 
-const double gravitational_constant=6.674e-11; 
-const double solar_mass=1.98892e30;
+constexpr double gravitational_constant=6.674e-11; 
+constexpr double solar_mass=1.98892e30;
 
-struct Body {
+struct Body {	
 	double x;
 	double y;
 	
-	double xv;
-	double yv;
+	double v_x;
+	double v_y;
 	
-	double xa;
-	double ya;
+	double a_x;
+	double a_y;
 	
 	double m; 
 };
 
-struct Force {
-    double x;
-    double y;
-};
-
-class NBS {
-	using id=std::vector<Body>::size_type;
+class BS {
+	//~ BS (Body Solver) is an abstract class. The method "Advance" has 
+	//~ to be implimented by subclasses (i.e. Euler, RK4 etc.).
 public:
-	explicit NBS (std::vector<Body> BB)
-		: B {BB} {}
-	NBS (std::vector<Body> BB, double tss, double sc)
-		: B {BB}, dt {tss},softening_constant {sc} {}
+	using id=std::vector<Body>::size_type;
 	
-	void solve(unsigned int num_steps);
+	explicit BS (std::vector<Body> BB)
+		: B {BB} {}
+	BS (std::vector<Body> BB, double tss, double sc)
+		: B {BB}, dt {tss}, softening_constant {sc} {}
+	
+	void solve_for(unsigned int num_steps);
 
-private:
-	void solve_next();
-	void solve_acc(id);
-	void euler_improved();
-	void forces(std::vector<Force>* F);
+protected:
+	virtual void Advance() = 0;
+	void ComputeAcceleration(std::vector<Body> *R, std::vector<Body> *W);
+	void WritePositionToFile(std::fstream &x_fst, std::fstream &y_fst);
 
 	std::vector<Body> B;
 	double dt = 1e11; // Time step size
 	double softening_constant = 3e4;
 };
 
-// N = number of bodies
-std::vector<Body> BuildBodies(std::vector<Body>::size_type N);
+class Euler_std : public BS {
+public:
+	explicit Euler_std(std::vector<Body> BB)
+		: BS (BB) {}
+	Euler_std (std::vector<Body> BB, double tss, double sc)
+		: BS (BB, tss, sc) {}
+
+	void Advance();
+};
 
 }
