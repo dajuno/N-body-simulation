@@ -5,7 +5,7 @@ int main() {
 	try
 	{
 		
-	int N = 1e2;
+	int N = 1e3;
 	double num_steps = 1e3;
 	
 	std::vector<Body> B = BuildBodies(N);
