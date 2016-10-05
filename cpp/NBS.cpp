@@ -29,6 +29,7 @@ inline void NBS::solve_acc(id n) {
 
 void NBS::solve_next() {
 	// Estimates the positions and velocities after dt
+    // standard first order Euler method
 	
 	#pragma omp parallel for
 	for (id i=0; i<B.size(); ++i) solve_acc(i);
@@ -45,6 +46,48 @@ void NBS::solve_next() {
 		B[n].x += B[n].xv *dt;
 		B[n].y += B[n].yv *dt;
 	}
+}
+
+void NBS::forces(std::vector<Force>& F) {
+	// Calculates forces without overwriting
+
+    double dx, dy, d, m;
+
+    for (id n=0; n<B.size(); ++n) {
+        F[n].x = 0;
+        F[n].y = 0;
+#pragma omp parallel for
+        for (id i=0; i<B.size(); ++i) {
+            dx = B[i].x - B[n].x;
+            dy = B[i].y - B[n].y;
+            d = sqrt(dx*dx + dy*dy + softening_constant);
+            m = B[i].m;
+            
+            F[n].x += dx*m / (d*d*d);
+            F[n].y += dy*m / (d*d*d);
+        }
+        
+        *F[n].x *= gravitational_constant;
+        *F[n].y *= gravitational_constant;
+    }
+
+}
+
+void NBS::euler_improved() {
+    // compute one time step with the Euler corrected integration scheme
+    // cf. Aarseth (2003): Gravitational N-Body-Simulations 
+    
+    // better not to do these declarations at every time step!?
+    std::vector<Force> F;
+
+    // 0. gather accelerations at current time
+#pragma omp parallel for
+    forces(&F);
+
+    // 1. first 
+    for (id n=0; n<B.size(); ++n) {
+
+
 }
 
 void NBS::solve(unsigned int num_steps) {

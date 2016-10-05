@@ -22,6 +22,11 @@ struct Body {
 	double m; 
 };
 
+struct Force {
+    double x;
+    double y;
+};
+
 class NBS {
 	using id=std::vector<Body>::size_type;
 public:
@@ -35,6 +40,8 @@ public:
 private:
 	void solve_next();
 	void solve_acc(id);
+	void euler_improved();
+	void forces(std::vector<Force>& F);
 
 	std::vector<Body> B;
 	double dt = 1e11; // Time step size
