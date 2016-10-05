@@ -17,10 +17,19 @@ def main():
     numpoints = x.shape[1]
     numframes = x.shape[0]
     c = np.random.random((1, numpoints))
-
+    my_list = []
+    for _ in range(0,numpoints//2):
+        my_list.append("deeppink")
+    
+    for _ in range(0,numpoints//2):
+        my_list.append("yellow")
+    
+    my_list[0] = "lime"
+    my_list[numpoints//2] = "red"
+	
     fig = plt.figure()
     
-    scat = plt.scatter(x[0][:], y[0][:], c=c, s=1e1)
+    scat = plt.scatter(x[0][:], y[0][:], c=my_list, s=2e1)
     
     plt.axis('equal')
     plt.xlim(-2e18, 2e18)

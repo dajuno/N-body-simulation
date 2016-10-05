@@ -1,111 +1,70 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <math.h>
-#include <random>
 #include "NBS.h"
 
 namespace N_body_simulation {
 
-inline void NBS::solve_acc(id n) {
-	//~ Calculates and overwrites acceleration using data 
-	//~ from current positions
-	B[n].xa=0;
-	B[n].ya=0;
-	
-	for (id i=0; i<B.size(); ++i) {
-		double dx = B[i].x-B[n].x;
-		double dy = B[i].y-B[n].y;
-		double d = sqrt(dx*dx + dy*dy + softening_constant);
-		double m = B[i].m;
-		
-		B[n].xa += dx*m / (d*d*d);
-		B[n].ya += dy*m / (d*d*d);
-	}
-	
-	B[n].xa *= gravitational_constant;
-	B[n].ya *= gravitational_constant;
-}
-
-void NBS::solve_next() {
-	// Estimates the positions and velocities after dt
-	
+inline void BS::ComputeAcceleration(std::vector<Body> *R, std::vector<Body> *W) {
+	//~ Calculates acceleration using data of R and writes it to W
 	#pragma omp parallel for
-	for (id i=0; i<B.size(); ++i) solve_acc(i);
-
-	//~ Calculate and overwrite velocities and positions using data  
-	//~ from current accelerations.
-	#pragma omp parallel for
-	for (id n=0; n<B.size(); ++n) {
-		B[n].xv += dt*B[n].xa;
-		B[n].yv += dt*B[n].ya;		
+	for (id n=0; n<W->size(); ++n) {
+	
+		Body &b = (*W)[n];
+		b.a_x=0;
+		b.a_y=0;
+	
+		for (id i=0; i<R->size(); ++i) {
+			Body &a = (*R)[i];
+			
+			double dx = a.x - b.x;
+			double dy = a.y - b.y;
+			double d = sqrt(dx*dx + dy*dy + softening_constant);
+			
+			b.a_x += dx*a.m / (d*d*d);
+			b.a_y += dy*a.m / (d*d*d);
+		}
 		
-		//~ B[n].x += B[n].xa *dt*dt/2 + B[n].xv *dt;
-		//~ B[n].y += B[n].ya *dt*dt/2 + B[n].yv *dt;
-		B[n].x += B[n].xv *dt;
-		B[n].y += B[n].yv *dt;
+		b.a_x *= gravitational_constant;
+		b.a_y *= gravitational_constant;
 	}
 }
 
-void NBS::solve(unsigned int num_steps) {
+void BS::WritePositionToFile(std::fstream &x_fst, std::fstream &y_fst) {
+	for (Body b : B) {
+		x_fst<<b.x<<" ";
+		y_fst<<b.y<<" ";
+	}
+	x_fst<<std::endl;
+	y_fst<<std::endl;
+}
+
+void BS::solve_for(unsigned int num_steps) {
 	//~ Advances the system num_steps times and, after each step,
 	//~ writes a line with the	current positions into the files "x" 
 	//~ and "y"
 	
-	// Open files
+	// Empty and open files
 	std::fstream x_fst("x", std::fstream::out | std::fstream::trunc);
 	std::fstream y_fst("y", std::fstream::out | std::fstream::trunc);
 	
-	// Write current positions to files
 	for (unsigned int s=0; s<num_steps; ++s) {
-		for (Body b : B) {
-			x_fst<<b.x<<" ";
-			y_fst<<b.y<<" ";
-		}
-		x_fst<<std::endl;
-		y_fst<<std::endl;
-	
-	// Solve the next iteration
-	solve_next();
+		WritePositionToFile(x_fst, y_fst);
+		Advance();
 	}
 }
 
-std::vector<Body> BuildBodies(std::vector<Body>::size_type N) {
-	//~ Builds a vector of starting Bodies which are sampled within in
-	//~ circle of radius r and have apropriate starting velocities.
-	//~ A large mass is put into the origin, to simulate dark matter :-)
+void Euler_std::Advance() {
+	// Estimates the positions and velocities after dt using a standard
+	// Euler approach
 	
-	std::vector<Body> B (N+1);
+	ComputeAcceleration(&B, &B);
 	
-	// Center with large mass
-	Body center {0,0,0,0,0,0,1e6*solar_mass};
-	B[0] = center;
-	
-	// Random number generators
-    std::random_device rd;
-    std::mt19937 gen(rd());
-	double radius = 1e18;
-    std::uniform_real_distribution<> dis_radius(0, radius);
-    std::uniform_real_distribution<> dis_angle(0, 2*M_PI);
-
-	// Sample body positions and calculate inial velocities (physics?)
-	for (std::vector<Body>::size_type i=1; i<N+1; ++i) {
-		double r = dis_radius(gen);
-		double angle = dis_angle(gen);
-		double num = gravitational_constant*1e6*solar_mass;
+	//~ Calculate and overwrite velocities
+	for (Body &b : B) {
+		b.x += b.v_x * dt;
+		b.y += b.v_y * dt;
 		
-		B[i].x = r * cos(angle);
-		B[i].y = r * sin(angle);
-		
-		B[i].xv = -sqrt(num/r) * sin(angle);
-		B[i].yv = sqrt(num/r) * cos(angle);
-		
-		B[i].xa = 0;
-		B[i].ya = 0;
-		
-		B[i].m = 10*solar_mass;
+		b.v_x += dt * b.a_x;
+		b.v_y += dt * b.a_y;
 	}
-	return B;
 }
 
 }
