@@ -1,4 +1,4 @@
-#include "NBS.h"
+#include "nbs.h"
 
 namespace N_body_simulation {
 
