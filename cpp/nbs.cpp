@@ -2,9 +2,8 @@
 
 namespace N_body_simulation {
 
-inline void BodySolver::ComputeAcceleration(const std::vector<Body> &R,
-        std::vector<Body> *W) {
-	//~ Calculates acceleration using data of R and writes it to W
+inline void BodySolver::ComputeAcceleration(std::vector<Body> *W) {
+	//~ Calculates acceleration due to gravity forces between bodies W
 #pragma omp parallel for
 	for (id n=0; n<W->size(); ++n) {
 	
@@ -12,8 +11,8 @@ inline void BodySolver::ComputeAcceleration(const std::vector<Body> &R,
 		b.a_x = 0;
 		b.a_y = 0;
 	
-		for (id i=0; i<R.size(); ++i) {
-			const Body &a = R[i];
+		for (id i=0; i<W->size(); ++i) {
+			const Body &a = (*W)[i];
 			
 			double dx = a.x - b.x;
 			double dy = a.y - b.y;
@@ -56,7 +55,7 @@ void Euler::Advance() {
 	// Estimates the positions and velocities after dt using a standard
 	// Euler approach
 	
-	ComputeAcceleration(B, &B);
+	ComputeAcceleration(&B);
 	
 	//~ Calculate and overwrite velocities
 	for (Body &b : B) {
@@ -74,7 +73,7 @@ void EulerImproved::Advance() {
 
 	double kt = 0.5*dt*dt;
     // 0.) update acceleration for current positions at time t0
-	ComputeAcceleration(B, &B);
+	ComputeAcceleration(&B);
     // copy the set of bodies
     B_prec = B;
     // 1.a) perform 1 Euler step to get a position prediction at time t1
@@ -83,7 +82,7 @@ void EulerImproved::Advance() {
         b.y += b.a_y*kt + b.v_y*dt;
     }
     // 1.b) acceleration prediction at time t1
-    ComputeAcceleration(B_prec, &B_prec);
+    ComputeAcceleration(&B_prec);
     // 2.a) compute mean acceleration and
     //   b) use it to perform correction time step 
 	for (unsigned int i=0; i<B.size(); ++i) {

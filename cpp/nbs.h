@@ -38,7 +38,7 @@ public:
 
 protected:
 	virtual void Advance() = 0;
-	void ComputeAcceleration(const std::vector<Body> &R, std::vector<Body> *W);
+	void ComputeAcceleration(std::vector<Body> *W);
 	void WritePositionToFile(std::fstream &x_fst, std::fstream &y_fst);
 
 	std::vector<Body> B;
