@@ -57,14 +57,37 @@ public:
 	void Advance();
 };
 
-class EulerLegacy : public BodySolver {
+class EulerAcc : public BodySolver {
 public:
-	explicit EulerLegacy(std::vector<Body> BB)
+	explicit EulerAcc(std::vector<Body> BB)
 		: BodySolver (BB) {}
-	EulerLegacy(std::vector<Body> BB, double tss, double sc)
+	EulerAcc(std::vector<Body> BB, double tss, double sc)
 		: BodySolver (BB, tss, sc) {}
 
 	void Advance();
+};
+
+class EulerStabilized : public BodySolver {
+public:
+	explicit EulerStabilized(std::vector<Body> BB)
+		: BodySolver (BB) {}
+	EulerStabilized(std::vector<Body> BB, double tss, double sc)
+		: BodySolver (BB, tss, sc) {}
+
+	void Advance();
+};
+
+class EulerAccImproved : public BodySolver {
+public:
+	explicit EulerAccImproved(std::vector<Body> BB)
+		: BodySolver (BB) {}
+	EulerAccImproved(std::vector<Body> BB, double tss, double sc)
+		: BodySolver (BB, tss, sc) {}
+
+	void Advance();
+
+private:
+    std::vector<Body> B_prec;
 };
 
 class EulerImproved : public BodySolver {

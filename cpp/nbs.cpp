@@ -51,26 +51,25 @@ void BodySolver::SolveTimeEvolution(unsigned int num_steps) {
 	}
 }
 
-void EulerLegacy::Advance() {
+void Euler::Advance() {
 	// Estimates the positions and velocities after dt using a standard
-	// Euler approach. "Legacy" version, first prototype, does not account for
-    // direct acceleration effects.
+	// Euler approach.
 	
 	ComputeAcceleration(&B);
 	
 	//~ Calculate and overwrite velocities
 	for (Body &b : B) {
-		b.x += b.v_x * dt;
-		b.y += b.v_y * dt;
+		b.x += dt * b.v_x;
+		b.y += dt * b.v_y;
 		
 		b.v_x += dt * b.a_x;
 		b.v_y += dt * b.a_y;
 	}
 }
 
-void Euler::Advance() {
+void EulerAcc::Advance() {
 	// Estimates the positions and velocities after dt using a standard
-	// Euler approach. Correct version including acceleration.
+	// Euler approach. Version including acceleration.
 	double kt = 0.5*dt*dt;
 	
 	ComputeAcceleration(&B);
@@ -85,8 +84,50 @@ void Euler::Advance() {
 	}
 }
 
+void EulerStabilized::Advance() {
+	// Estimates the positions and velocities after dt using a stabilized
+	// Euler method, via a "semi"-implicit position update.
+	
+	ComputeAcceleration(&B);
+	
+	for (Body &b : B) {
+		b.v_x += dt * b.a_x;
+		b.v_y += dt * b.a_y;
+
+        b.x += b.v_x*dt;
+        b.y += b.v_y*dt;
+	}
+}
 
 void EulerImproved::Advance() {
+    // Perform one time step with the improved Euler method, also referred to
+    // as Heun's method and 2-stage Runge-Kutta method.
+
+    // 0.) update acceleration for current positions at time t0
+	ComputeAcceleration(&B);
+    // copy the set of bodies
+    B_prec = B;
+    // 1.a) perform 1 Euler step to get a position prediction at time t1
+    for (Body &b : B_prec) {
+        b.x += dt*b.v_x;
+        b.y += dt*b.v_y;
+        b.v_x += dt*b.a_x;
+        b.v_y += dt*b.a_y;
+    }
+    // 1.b) acceleration prediction at time t1
+    ComputeAcceleration(&B_prec);
+    // 2.a) compute mean acceleration and
+    //   b) use it to perform correction time step 
+	for (unsigned int i=0; i<B.size(); ++i) {
+        B[i].x += 0.5*dt*(B[i].v_x + B_prec[i].v_x);
+        B[i].y += 0.5*dt*(B[i].v_y + B_prec[i].v_y);
+		
+        B[i].v_x += 0.5*dt*(B[i].a_x + B_prec[i].a_x);
+        B[i].v_y += 0.5*dt*(B[i].a_y + B_prec[i].a_y);
+	}
+
+}
+void EulerAccImproved::Advance() {
     // Perform one time step with the improved Euler method, also referred to
     // as Heun's method and 2-stage Runge-Kutta method.
 
