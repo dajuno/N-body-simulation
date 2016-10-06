@@ -56,4 +56,17 @@ public:
 	void Advance();
 };
 
+class EulerImproved : public BodySolver {
+public:
+	explicit EulerImproved(std::vector<Body> BB)
+		: BodySolver (BB) {}
+	EulerImproved(std::vector<Body> BB, double tss, double sc)
+		: BodySolver (BB, tss, sc) {}
+
+	void Advance();
+
+private:
+    std::vector<Body> B_prec;
+};
+
 }
