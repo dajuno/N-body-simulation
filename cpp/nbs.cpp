@@ -76,7 +76,7 @@ double BodySolver::ComputeTotalEnergy() {
             if (i != k) {
                 double dx = B[i].x - B[k].x;
                 double dy = B[i].y - B[k].y;
-                double d = sqrt(dx*dx + dy*dy);
+                double d = sqrt(dx*dx + dy*dy + softening_constant);
                 E_pot_loc += B[k].m/d;
             }
         }
