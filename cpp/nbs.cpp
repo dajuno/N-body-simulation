@@ -51,9 +51,10 @@ void BodySolver::SolveTimeEvolution(unsigned int num_steps) {
 	}
 }
 
-void Euler::Advance() {
+void EulerLegacy::Advance() {
 	// Estimates the positions and velocities after dt using a standard
-	// Euler approach
+	// Euler approach. "Legacy" version, first prototype, does not account for
+    // direct acceleration effects.
 	
 	ComputeAcceleration(&B);
 	
@@ -66,6 +67,24 @@ void Euler::Advance() {
 		b.v_y += dt * b.a_y;
 	}
 }
+
+void Euler::Advance() {
+	// Estimates the positions and velocities after dt using a standard
+	// Euler approach. Correct version.
+	double kt = 0.5*dt*dt;
+	
+	ComputeAcceleration(&B);
+	
+	//~ Calculate and overwrite velocities
+	for (Body &b : B) {
+        b.x += b.a_x*kt + b.v_x*dt;
+        b.y += b.a_y*kt + b.v_y*dt;
+
+		b.v_x += dt * b.a_x;
+		b.v_y += dt * b.a_y;
+	}
+}
+
 
 void EulerImproved::Advance() {
     // Perform one time step with the improved Euler method, also referred to

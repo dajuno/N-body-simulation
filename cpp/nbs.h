@@ -46,11 +46,22 @@ protected:
 	double softening_constant = 3e4;
 };
 
+
 class Euler : public BodySolver {
 public:
 	explicit Euler(std::vector<Body> BB)
 		: BodySolver (BB) {}
 	Euler(std::vector<Body> BB, double tss, double sc)
+		: BodySolver (BB, tss, sc) {}
+
+	void Advance();
+};
+
+class EulerLegacy : public BodySolver {
+public:
+	explicit EulerLegacy(std::vector<Body> BB)
+		: BodySolver (BB) {}
+	EulerLegacy(std::vector<Body> BB, double tss, double sc)
 		: BodySolver (BB, tss, sc) {}
 
 	void Advance();
