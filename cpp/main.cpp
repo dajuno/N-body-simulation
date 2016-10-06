@@ -89,12 +89,13 @@ int main() {
 	{
 	
 	
-	int N = 1e2;
-	double num_steps = 5e3;
-	std::vector<Body> B = GenerateClash(N);
+	int N = 1;
+	double num_steps = 1e4;
+	// std::vector<Body> B = GenerateClash(N);
+	std::vector<Body> B = BuildBodies(N);
 	
-    EulerAccImproved elstd {B};
-    // EulerImproved elstd {B};
+    // EulerAccImproved elstd {B};
+    EulerImproved elstd {B};
     // EulerAcc elstd {B};
     // Euler elstd {B};
     // EulerStabilized elstd {B};
