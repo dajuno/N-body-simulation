@@ -23,15 +23,15 @@ struct Body {
 	double m; 
 };
 
-class BS {
-	//~ BS (Body Solver) is an abstract class. The method "Advance" has 
+class BodySolver {
+	//~ BodySolver is an abstract class. The method "Advance" has 
 	//~ to be implimented by subclasses (i.e. Euler, RK4 etc.).
 public:
 	using id=std::vector<Body>::size_type;
 	
-	explicit BS (std::vector<Body> BB)
+	explicit BodySolver (std::vector<Body> BB)
 		: B {BB} {}
-	BS (std::vector<Body> BB, double tss, double sc)
+	BodySolver (std::vector<Body> BB, double tss, double sc)
 		: B {BB}, dt {tss}, softening_constant {sc} {}
 	
 	void solve_for(unsigned int num_steps);
@@ -46,12 +46,12 @@ protected:
 	double softening_constant = 3e4;
 };
 
-class Euler_std : public BS {
+class Euler_std : public BodySolver {
 public:
 	explicit Euler_std(std::vector<Body> BB)
-		: BS (BB) {}
+		: BodySolver (BB) {}
 	Euler_std (std::vector<Body> BB, double tss, double sc)
-		: BS (BB, tss, sc) {}
+		: BodySolver (BB, tss, sc) {}
 
 	void Advance();
 };

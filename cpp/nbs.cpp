@@ -1,9 +1,8 @@
-#include "NBS.h"
+#include "nbs.h"
 
 namespace N_body_simulation {
 
-inline void BS::ComputeAcceleration(std::vector<Body> *R, std::vector<Body> *W)
-{
+inline void BodySolver::ComputeAcceleration(std::vector<Body> *R, std::vector<Body> *W) {
 	//~ Calculates acceleration using data of R and writes it to W
 #pragma omp parallel for
 	for (id n=0; n<W->size(); ++n) {
@@ -28,7 +27,7 @@ inline void BS::ComputeAcceleration(std::vector<Body> *R, std::vector<Body> *W)
 	}
 }
 
-void BS::WritePositionToFile(std::fstream &x_fst, std::fstream &y_fst) {
+void BodySolver::WritePositionToFile(std::fstream &x_fst, std::fstream &y_fst) {
 	for (Body b : B) {
 		x_fst<<b.x<<" ";
 		y_fst<<b.y<<" ";
@@ -115,7 +114,7 @@ void NBS::euler_improved() {
 }
 */
 
-void BS::solve_for(unsigned int num_steps) {
+void BodySolver::solve_for(unsigned int num_steps) {
 	//~ Advances the system num_steps times and, after each step,
 	//~ writes a line with the	current positions into the files "x" 
 	//~ and "y"
