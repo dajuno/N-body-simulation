@@ -2,17 +2,17 @@
 
 namespace N_body_simulation {
 
-inline void BodySolver::ComputeAcceleration(std::vector<Body> *W) {
-	//~ Calculates acceleration due to gravity forces between bodies W
+inline void BodySolver::ComputeAcceleration(std::vector<Body> *B) {
+	//~ Calculates acceleration due to gravity forces between bodies B
 #pragma omp parallel for
-	for (id n=0; n<W->size(); ++n) {
+	for (id n=0; n<B->size(); ++n) {
 	
-		Body &b = (*W)[n];
+		Body &b = (*B)[n];
 		b.a_x = 0;
 		b.a_y = 0;
 	
-		for (id i=0; i<W->size(); ++i) {
-			const Body &a = (*W)[i];
+		for (id i=0; i<B->size(); ++i) {
+			const Body &a = (*B)[i];
 			
 			double dx = a.x - b.x;
 			double dy = a.y - b.y;
@@ -36,6 +36,11 @@ void BodySolver::WritePositionToFile(std::fstream &x_fst, std::fstream &y_fst) {
 	y_fst<<std::endl;
 }
 
+void BodySolver::WriteEnergyToFile(std::fstream &e_fst, const double E) {
+    e_fst<< E << std::endl;
+}
+
+
 void BodySolver::SolveTimeEvolution(unsigned int num_steps) {
 	//~ Advances the system num_steps times and, after each step,
 	//~ writes a line with the	current positions into the files "x" 
@@ -44,11 +49,42 @@ void BodySolver::SolveTimeEvolution(unsigned int num_steps) {
 	// Empty and open files
 	std::fstream x_fst("x", std::fstream::out | std::fstream::trunc);
 	std::fstream y_fst("y", std::fstream::out | std::fstream::trunc);
+	std::fstream e_fst("energy", std::fstream::out | std::fstream::trunc);
 	
 	for (unsigned int s=0; s<num_steps; ++s) {
 		WritePositionToFile(x_fst, y_fst);
 		Advance();
+        double E_tot = ComputeTotalEnergy();
+        WriteEnergyToFile(e_fst, E_tot);
 	}
+}
+
+double BodySolver::ComputeTotalEnergy() {
+    // compute total energy of the N-body system at the current time
+    // this could be merged with ComputeAcceleration and enabled with an option
+    // switch
+    double E_tot = 0;
+    double E_kin = 0;
+    double E_pot = 0;
+
+#pragma omp parallel for    
+    for (unsigned int i=0; i<B.size(); ++i) {
+        E_kin += 0.5*B[i].m*(B[i].v_x*B[i].v_x + B[i].v_y*B[i].v_y);
+
+        double E_pot_loc = 0;
+        for (unsigned int k=0; k<B.size(); ++k) {
+            if (i != k) {
+                double dx = B[i].x - B[k].x;
+                double dy = B[i].y - B[k].y;
+                double d = sqrt(dx*dx + dy*dy);
+                E_pot_loc += B[k].m/d;
+            }
+        }
+        E_pot += 0.5*B[i].m*gravitational_constant*E_pot_loc;
+    }
+
+    E_tot = E_kin + E_pot;
+    return E_tot;
 }
 
 void Euler::Advance() {

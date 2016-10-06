@@ -38,8 +38,10 @@ public:
 
 protected:
 	virtual void Advance() = 0;
-	void ComputeAcceleration(std::vector<Body> *W);
+	void ComputeAcceleration(std::vector<Body> *B);
+    double ComputeTotalEnergy();
 	void WritePositionToFile(std::fstream &x_fst, std::fstream &y_fst);
+    void WriteEnergyToFile(std::fstream &e_fst, double E);
 
 	std::vector<Body> B;
 	double dt = 1e11; // Time step size
