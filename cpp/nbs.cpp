@@ -2,7 +2,8 @@
 
 namespace N_body_simulation {
 
-inline void BodySolver::ComputeAcceleration(std::vector<Body> *R, std::vector<Body> *W) {
+inline void BodySolver::ComputeAcceleration(const std::vector<Body> &R,
+        std::vector<Body> *W) {
 	//~ Calculates acceleration using data of R and writes it to W
 #pragma omp parallel for
 	for (id n=0; n<W->size(); ++n) {
@@ -133,7 +134,7 @@ void Euler_std::Advance() {
 	// Estimates the positions and velocities after dt using a standard
 	// Euler approach
 	
-	ComputeAcceleration(&B, &B);
+	ComputeAcceleration(B, &B);
 	
 	//~ Calculate and overwrite velocities
 	for (Body &b : B) {
