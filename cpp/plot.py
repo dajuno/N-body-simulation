@@ -48,12 +48,13 @@ def update_plot(i, a, b, scat):
 def energy():
     E = np.loadtxt("energy")
     plt.figure()
-    plt.plot(E, 'o-', ms=14, lw=2)
-    plt.title('Total energy')
+    plt.plot(E/E[0], 'o-', ms=4, lw=2)
+    plt.title('Realtive total energy')
     plt.xlabel('iteration')
-    plt.ylabel(r'$E_{tot}$')
+    plt.ylabel(r'$E_{tot}(t)/E_{tot}(0)$')
 
 
 if __name__ == '__main__':
+    energy()
     main()
     plt.show()
