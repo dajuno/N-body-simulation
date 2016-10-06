@@ -70,7 +70,7 @@ void EulerLegacy::Advance() {
 
 void Euler::Advance() {
 	// Estimates the positions and velocities after dt using a standard
-	// Euler approach. Correct version.
+	// Euler approach. Correct version including acceleration.
 	double kt = 0.5*dt*dt;
 	
 	ComputeAcceleration(&B);
