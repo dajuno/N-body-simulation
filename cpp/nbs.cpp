@@ -53,9 +53,9 @@ void BodySolver::SolveTimeEvolution(unsigned int num_steps) {
 	
 	for (unsigned int s=0; s<num_steps; ++s) {
 		WritePositionToFile(x_fst, y_fst);
+        WriteEnergyToFile(e_fst, ComputeTotalEnergy());
+
 		Advance();
-        double E_tot = ComputeTotalEnergy();
-        WriteEnergyToFile(e_fst, E_tot);
 	}
 }
 
