@@ -37,7 +37,7 @@ void BodySolver::WritePositionToFile(std::fstream &x_fst, std::fstream &y_fst) {
 }
 
 void BodySolver::WriteEnergyToFile(std::fstream &e_fst, const double E) {
-    e_fst<< E << std::endl;
+    e_fst << E << std::endl;
 }
 
 
