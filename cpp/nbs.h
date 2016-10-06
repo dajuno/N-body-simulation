@@ -34,11 +34,11 @@ public:
 	BodySolver (std::vector<Body> BB, double tss, double sc)
 		: B {BB}, dt {tss}, softening_constant {sc} {}
 	
-	void solve_for(unsigned int num_steps);
+	void SolveTimeEvolution(unsigned int num_steps);
 
 protected:
 	virtual void Advance() = 0;
-	void ComputeAcceleration(std::vector<Body> *R, std::vector<Body> *W);
+	void ComputeAcceleration(const std::vector<Body> &R, std::vector<Body> *W);
 	void WritePositionToFile(std::fstream &x_fst, std::fstream &y_fst);
 
 	std::vector<Body> B;
@@ -46,11 +46,11 @@ protected:
 	double softening_constant = 3e4;
 };
 
-class Euler_std : public BodySolver {
+class Euler : public BodySolver {
 public:
-	explicit Euler_std(std::vector<Body> BB)
+	explicit Euler(std::vector<Body> BB)
 		: BodySolver (BB) {}
-	Euler_std (std::vector<Body> BB, double tss, double sc)
+	Euler(std::vector<Body> BB, double tss, double sc)
 		: BodySolver (BB, tss, sc) {}
 
 	void Advance();
