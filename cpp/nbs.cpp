@@ -9,11 +9,11 @@ inline void BodySolver::ComputeAcceleration(const std::vector<Body> &R,
 	for (id n=0; n<W->size(); ++n) {
 	
 		Body &b = (*W)[n];
-		b.a_x=0;
-		b.a_y=0;
+		b.a_x = 0;
+		b.a_y = 0;
 	
-		for (id i=0; i<R->size(); ++i) {
-			Body &a = (*R)[i];
+		for (id i=0; i<R.size(); ++i) {
+			const Body &a = R[i];
 			
 			double dx = a.x - b.x;
 			double dy = a.y - b.y;
@@ -111,11 +111,9 @@ void NBS::euler_improved() {
 		B[n].yv += dt*Fmean_y;
 	}
 
+} */
 
-}
-*/
-
-void BodySolver::solve_for(unsigned int num_steps) {
+void BodySolver::SolveTimeEvolution(unsigned int num_steps) {
 	//~ Advances the system num_steps times and, after each step,
 	//~ writes a line with the	current positions into the files "x" 
 	//~ and "y"
@@ -130,7 +128,7 @@ void BodySolver::solve_for(unsigned int num_steps) {
 	}
 }
 
-void Euler_std::Advance() {
+void Euler::Advance() {
 	// Estimates the positions and velocities after dt using a standard
 	// Euler approach
 	
@@ -144,6 +142,38 @@ void Euler_std::Advance() {
 		b.v_x += dt * b.a_x;
 		b.v_y += dt * b.a_y;
 	}
+}
+
+void EulerImproved::Advance() {
+    // Perform one time step with the improved Euler method, also referred to
+    // as Heun's method and 2-stage Runge-Kutta method.
+
+	double kt = 0.5*dt*dt;
+    // 0.) update acceleration for current positions at time t0
+	ComputeAcceleration(B, &B);
+    // copy the set of bodies
+    B_prec = B;
+    // 1.a) perform 1 Euler step to get a position prediction at time t1
+    for (Body &b : B_prec) {
+        b.x += b.a_x*kt + b.v_x*dt;
+        b.y += b.a_y*kt + b.v_y*dt;
+    }
+    // 1.b) acceleration prediction at time t1
+    ComputeAcceleration(B_prec, &B_prec);
+    // 2.a) compute mean acceleration and
+    //   b) use it to perform correction time step 
+	for (unsigned int i=0; i<B.size(); ++i) {
+        // can I use (Body a, Body b:B, B_prec) construct?
+        double acc_mean_x = 0.5*(B[i].a_x + B_prec[i].a_x);
+        double acc_mean_y = 0.5*(B[i].a_y + B_prec[i].a_y);
+        // or overwrite B[i].a_x with acc_mean_x ... does not matter
+		B[i].x += acc_mean_x*kt + B[i].v_x*dt;
+		B[i].y += acc_mean_y*kt + B[i].v_y*dt;
+		
+        B[i].v_x += acc_mean_x*dt;
+        B[i].v_y += acc_mean_y*dt;
+	}
+
 }
 
 }

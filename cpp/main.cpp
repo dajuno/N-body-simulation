@@ -93,9 +93,8 @@ int main() {
 	double num_steps = 5e3;
 	std::vector<Body> B = GenerateClash(N);
 	
-	Euler_std elstd {B};
-	elstd.solve_for(num_steps);
-
+	Euler elstd {B};
+	elstd.SolveTimeEvolution(num_steps);
 
 	return 0;
 	}
