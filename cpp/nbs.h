@@ -23,6 +23,31 @@ struct Body {
 	double m; 
 };
 
+bool BodyIsInQuadrant(Body b, Body q, double l);
+
+struct Node {
+public:
+	Node(Body qq, double ll) : q {qq}, l {ll} {}
+	Node();
+	
+	Body q; // Quadrant
+	double l; // Length of quadrant
+	
+	Body b;	// Body
+	bool empty = true;
+
+	std::shared_ptr<Node> NE = nullptr;
+	std::shared_ptr<Node> NW = nullptr;
+	std::shared_ptr<Node> SE = nullptr;
+	std::shared_ptr<Node> SW = nullptr;
+};
+
+void insert_in_tree(std::shared_ptr<Node>, Body);
+std::shared_ptr<Node> BuildTree(std::vector<Body> B, double length);
+void print_tree(std::shared_ptr<Node> node);
+
+void GetBodiesFromTree(std::shared_ptr<Node> node, Body b, std::vector<Body>* TB);
+
 class BodySolver {
 	//~ BodySolver is an abstract class. The method "Advance" has 
 	//~ to be implimented by subclasses (i.e. Euler, RK4 etc.).

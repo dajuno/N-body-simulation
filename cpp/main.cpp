@@ -87,11 +87,11 @@ using namespace N_body_simulation;
 int main() {
 	try
 	{
-		
+	
 	int N = 1e3;
 	double num_steps = 1e3;
-
-	// std::vector<Body> B = GenerateClash(N);
+	
+	//~ std::vector<Body> B = GenerateClash(N);
 	std::vector<Body> B = BuildBodies(N);
 	
     // EulerAccImproved elstd {B};

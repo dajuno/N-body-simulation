@@ -55,6 +55,6 @@ def energy():
 
 
 if __name__ == '__main__':
-    energy()
+    #energy()
     main()
     plt.show()
