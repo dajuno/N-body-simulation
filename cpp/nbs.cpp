@@ -59,7 +59,7 @@ void insert_in_tree(std::shared_ptr<Node> node, Body b) {
 	}
 }
 
-std::shared_ptr<Node> BuildTree(std::vector<Body> B, double universe_length) {
+std::shared_ptr<Node> BuildTree(std::vector<Body> *B, double universe_length) {
 	// Builds a QuadTree for bodies inside (!) the Quadrant centered
 	//~ at the origin and of side length 2l.
 	Body origin;
@@ -67,7 +67,7 @@ std::shared_ptr<Node> BuildTree(std::vector<Body> B, double universe_length) {
 	std::shared_ptr<Node> root = 
 		std::shared_ptr<Node> ( new Node {origin, universe_length} );
 	
-	for (Body b : B) {
+	for (Body b : (*B)) {
 		if ( BodyIsInQuadrant(b,origin,universe_length) ) 
 			insert_in_tree(root,b);
 	}
@@ -90,7 +90,7 @@ void print_tree(std::shared_ptr<Node> node) {
 	}
 }
 
-void GetBodiesFromTree(std::shared_ptr<Node> node, Body b, std::vector<Body>* TB) {
+void GetBodiesFromTree(std::shared_ptr<Node> node, Body b, std::vector<Body> *TB) {
 		if (node) {
 			// If node is a leaf, push back its body
 			bool is_leaf = !node->NE && !node->NW && !node->SE && !node->SW;
@@ -116,11 +116,36 @@ void GetBodiesFromTree(std::shared_ptr<Node> node, Body b, std::vector<Body>* TB
 		}
 	}
 
+//~ inline void BodySolver::ComputeAcceleration(std::vector<Body> *B) {
+	//~ // BRUTE FORCE
+	//~ Calculates acceleration due to gravity forces between bodies B
+//~ #pragma omp parallel for
+	//~ for (id n=0; n<B->size(); ++n) {
+	
+		//~ Body &b = (*B)[n];
+		//~ b.a_x = 0;
+		//~ b.a_y = 0;
+	
+		//~ for (id i=0; i<B->size(); ++i) {
+			//~ const Body &a = (*B)[i];
+			
+			//~ double dx = a.x - b.x;
+			//~ double dy = a.y - b.y;
+			//~ double d = sqrt(dx*dx + dy*dy + softening_constant);
+			
+			//~ b.a_x += dx*a.m / (d*d*d);
+			//~ b.a_y += dy*a.m / (d*d*d);
+		//~ }
+		
+		//~ b.a_x *= gravitational_constant;
+		//~ b.a_y *= gravitational_constant;
+	//~ }
+//~ }
 
 inline void BodySolver::ComputeAcceleration(std::vector<Body> *B) {
+	// TREE
 	//~ Calculates acceleration due to gravity forces between bodies B
-	
-	std::shared_ptr<Node> root = BuildTree(*B,5e18);
+	std::shared_ptr<Node> root = BuildTree(B,5e18);
 #pragma omp parallel for
 	for (id n=0; n<B->size(); ++n) {
 	
@@ -131,7 +156,7 @@ inline void BodySolver::ComputeAcceleration(std::vector<Body> *B) {
 		std::vector<Body> TB;
 		GetBodiesFromTree(root, b, &TB);
 	
-		for (id i=0; i<B->size(); ++i) {
+		for (id i=0; i<TB.size(); ++i) {
 			const Body &a = TB[i];
 			
 			double dx = a.x - b.x;

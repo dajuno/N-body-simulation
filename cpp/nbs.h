@@ -43,10 +43,9 @@ public:
 };
 
 void insert_in_tree(std::shared_ptr<Node>, Body);
-std::shared_ptr<Node> BuildTree(std::vector<Body> B, double length);
+std::shared_ptr<Node> BuildTree(std::vector<Body> *B, double length);
 void print_tree(std::shared_ptr<Node> node);
-
-void GetBodiesFromTree(std::shared_ptr<Node> node, Body b, std::vector<Body>* TB);
+void GetBodiesFromTree(std::shared_ptr<Node> node, Body b, std::vector<Body> *TB);
 
 class BodySolver {
 	//~ BodySolver is an abstract class. The method "Advance" has 

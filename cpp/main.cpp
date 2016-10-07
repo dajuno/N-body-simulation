@@ -88,7 +88,7 @@ int main() {
 	try
 	{
 	
-	int N = 1e3;
+	int N = 1e4;
 	double num_steps = 1e3;
 	
 	//~ std::vector<Body> B = GenerateClash(N);
