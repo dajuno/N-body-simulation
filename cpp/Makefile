@@ -5,7 +5,7 @@ main.o: main.cpp
 	g++ -std=c++14 -fopenmp -O3 -c main.cpp
 
 NBS.o: NBS.cpp
-	g++ -std=c++14 -fopenmp -O3 -c NBS.cpp NBS.h 
+	g++ -std=c++14 -fopenmp -O3 -c NBS.h NBS.cpp 
 
 clean:
-	rm -f NBS.o main.o main
+	rm -f NBS.o main.o main NBS.h.gch

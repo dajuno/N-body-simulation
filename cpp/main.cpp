@@ -87,9 +87,29 @@ using namespace N_body_simulation;
 int main() {
 	try
 	{
+	//~ double length = 4;
+	//~ Body b0 {-0.5, -7.5, 0, 0, 0, 0, 0};
+	//~ Body b1 {-1, -3, 0, 0, 0, 0, 1};
+	//~ Body b2 {1, -1, 0, 0, 0, 0, 2};
+	//~ Body b3 {1, 1, 0, 0, 0, 0, 3};
+	//~ Body b4 {0.5, 0.5, 0, 0, 0, 0, 4};
+	//~ Body b5 {2, 2, 0, 0, 0, 0, 5};
+	//~ Body b6 {-3, -2, 0, 0, 0, 0, 6};
+	//~ Body b7 {-3.5, -2.5, 0, 0, 0, 0, 7};
+	//~ Body b8 {-3, -3, 0, 0, 0, 0, 8};
+	
+	//~ std::vector<Body> B {b1,b2,b3,b4,b5,b6,b7,b8};
+	
+	//~ std::shared_ptr<Node> root = BuildTree(B,length);
+	//~ print_tree(root);
+	
+	//~ std::vector<Body> TB;
 	
 	
-	int N = 1e2;
+	//~ GetBodiesFromTree(root, b4, &TB);
+	//~ for (Body b : TB) std::cout<<b.m<<std::endl;
+	
+	int N = 1e3;
 	double num_steps = 5e3;
 	std::vector<Body> B = GenerateClash(N);
 	

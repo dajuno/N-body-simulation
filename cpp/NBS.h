@@ -11,17 +11,42 @@ constexpr double gravitational_constant=6.674e-11;
 constexpr double solar_mass=1.98892e30;
 
 struct Body {	
-	double x;
-	double y;
+	double x=0;
+	double y=0;
 	
-	double v_x;
-	double v_y;
+	double v_x=0;
+	double v_y=0;
 	
-	double a_x;
-	double a_y;
+	double a_x=0;
+	double a_y=0;
 	
-	double m; 
+	double m=0; 
 };
+
+bool body_in_quadrant(Body b, Body q, double l);
+
+struct Node {
+public:
+	Node(Body qq, double ll) : q {qq}, l {ll} {}
+	Node();
+	
+	Body q; // Quadrant
+	double l; // Length of quadrant
+	
+	Body b;	// Body
+	bool empty = true;
+
+	std::shared_ptr<Node> NE = nullptr;
+	std::shared_ptr<Node> NW = nullptr;
+	std::shared_ptr<Node> SE = nullptr;
+	std::shared_ptr<Node> SW = nullptr;
+};
+
+void insert_in_tree(std::shared_ptr<Node>, Body);
+std::shared_ptr<Node> BuildTree(std::vector<Body> B, double length);
+void print_tree(std::shared_ptr<Node> node);
+
+void GetBodiesFromTree(std::shared_ptr<Node> node, Body b, std::vector<Body>* TB);
 
 class BS {
 	//~ BS (Body Solver) is an abstract class. The method "Advance" has 
@@ -38,7 +63,7 @@ public:
 
 protected:
 	virtual void Advance() = 0;
-	void ComputeAcceleration(std::vector<Body> *R, std::vector<Body> *W);
+	void ComputeAcceleration(const std::vector<Body> &R, std::vector<Body> *W);
 	void WritePositionToFile(std::fstream &x_fst, std::fstream &y_fst);
 
 	std::vector<Body> B;
