@@ -8,6 +8,7 @@ http://www.scholarpedia.org/article/N-body_simulations_(gravitational)
  - use better output format
  - implement AC
  - deal with collisions
+ - clean up solver interface (Brute Force / Tree)
  - parallel: openmp vs. MPI
 - python
  - create more versatile solver, benchmark
