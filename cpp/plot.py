@@ -1,10 +1,9 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 # For movies:
 #import matplotlib
 #matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-
 def main():
 
    # For movies:
@@ -29,16 +28,18 @@ def main():
 
     fig = plt.figure()
 
-    scat = plt.scatter(x[0][:], y[0][:], c=my_list, s=2e1)
+    scat = plt.scatter(x[0][:], y[0][:], c=my_list, s=1e1)
 
     plt.axis('equal')
-    plt.xlim(-2e18, 2e18)
-    plt.ylim(-2e18, 2e18)
-
+    plt.xlim(-4e18, 4e18)
+    plt.ylim(-4e18, 4e18)
+    print("1")
     ani = animation.FuncAnimation(fig, update_plot, frames=range(numframes), interval=1, fargs=(x,y, scat))
-
-    # For movies:                            
+    print("2")
+    #For movies:                            
     #ani.save('animation.mp4', writer=writer)
+    print("3")
+    plt.show()
 
 def update_plot(i, a, b, scat):
     data = np.vstack((a[i][:],b[i][:])).T
@@ -57,4 +58,3 @@ def energy():
 if __name__ == '__main__':
     #energy()
     main()
-    plt.show()

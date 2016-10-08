@@ -7,24 +7,67 @@
 
 namespace N_body_simulation {
 
+
+//~ tpl
 constexpr double gravitational_constant=6.674e-11; 
 constexpr double solar_mass=1.98892e30;
-
-struct Body {	
-	double x;
-	double y;
+struct tpl {
+	double x=0;
+	double y=0;
 	
-	double v_x;
-	double v_y;
-	
-	double a_x;
-	double a_y;
-	
-	double m; 
+tpl& operator+=(const tpl& rhs) {
+	x += rhs.x;
+	y += rhs.y;
+	return *this;
+}
+tpl& operator-=(const tpl& rhs) {
+	x -= rhs.x;
+	y -= rhs.y;
+	return *this;
+}
+tpl& operator*=(const double& rhs) {
+	x *= rhs;
+	y *= rhs;
+	return *this;
+}
+tpl& operator/=(const double& rhs) {
+	x /= rhs;
+	y /= rhs;
+	return *this;
+}
+bool operator==(const tpl& rhs) {
+	return x == rhs.x && y == rhs.y;
+}
+bool operator<=(const tpl& rhs) {
+	return x <= rhs.x && y <= rhs.y;
+}
+bool operator<(const tpl& rhs) {
+	return x < rhs.x && y < rhs.y;
+}
+bool operator>(const tpl& rhs) {
+	return x > rhs.x && y > rhs.y;
+}
+bool operator>=(const tpl& rhs) {
+	return x >= rhs.x && y >= rhs.y;
+}
 };
+std::ostream& operator<<(std::ostream& ost, const tpl& tuple);
+tpl operator+(const tpl& lhs, const tpl& rhs);
+tpl operator-(const tpl& lhs, const tpl& rhs);
+tpl operator*(const double& lhs, const tpl& rhs);
+double operator*(const tpl lhs, const tpl& rhs);
 
+//~ Body
+struct Body {	
+	tpl r;
+	tpl v;
+	tpl a;
+	double m;
+};
+std::ostream& operator<<(std::ostream& ost, const Body& b);
+
+//~ QuadTree
 bool BodyIsInQuadrant(Body b, Body q, double l);
-
 struct Node {
 public:
 	Node(Body qq, double ll) : q {qq}, l {ll} {}
@@ -46,6 +89,9 @@ void insert_in_tree(std::shared_ptr<Node>, Body);
 std::shared_ptr<Node> BuildTree(std::vector<Body> *B, double length);
 void print_tree(std::shared_ptr<Node> node);
 void GetBodiesFromTree(std::shared_ptr<Node> node, Body b, std::vector<Body> *TB);
+
+
+//~ BodySolver
 
 class BodySolver {
 	//~ BodySolver is an abstract class. The method "Advance" has 
